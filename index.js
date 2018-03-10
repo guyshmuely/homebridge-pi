@@ -2,8 +2,17 @@
 
 var fs = require('fs');
 
+// CHANGED
+var Gpio = require('pigpio').Gpio,
+    fanDutyCycle = 0,
+    fanGpio = new Gpio(21, {mode: Gpio.OUTPUT});
+
+
 var Service, Characteristic;
 var temperatureService;
+
+// CHANGED
+var fanService;
 
 module.exports = function (homebridge)
   {
@@ -41,6 +50,50 @@ PiTemperatureAccessory.prototype =
     callback(); // success
     },
 
+  // CHANGED
+  setFanDutyCycle: function()
+    {
+      fanGpio.pwmWrite(fanDutyCycle);
+    },
+
+  getFanOn: function(cb)
+    {
+      const on = fanDutyCycle > 0;
+      cb(null, on);
+    },
+
+  setFanOn: function (on, cb)
+    {
+      if (on) {
+        fanDutyCycle = 255;
+      } else {
+        fanDutyCycle = 0; // 0% duty cycle to turn off
+      }
+      this.setFanDutyCycle();
+      cb(null, on);
+    },
+
+  getFanRotationSpeed:function (cb)
+    {
+      cb(null, (fanDutyCycle / 255) * 100);
+    },
+
+  setFanRotationSpeed:function (speed, cb)
+    {
+      // speed given is a number 100 (full power) to 0
+      //console.log('setRotationSpeed',speed);
+      // scale speed by duty cycle
+      fanDutyCycle = 0|(speed / 100 * 255);
+      //if (this.dutycycle < this.min_dutycycle) this.dutycycle = this.min_dutycycle; // clamp to minimum TODO: return error to user if can't go this low?
+      //console.log('dutycycle',this.dutycycle);
+      this.setFanDutyCycle()
+      cb(null);
+    },
+
+
+
+
+
   getServices: function ()
     {
     var informationService = new Service.AccessoryInformation();
@@ -68,10 +121,21 @@ PiTemperatureAccessory.prototype =
       .getCharacteristic(Characteristic.CurrentTemperature)
       .setProps({maxValue: 120});
 
-    return [informationService, temperatureService];
+    // CHANGED
+    fanService = new Service.Fan(this.name);
+    fanService.fan
+      .getCharacteristic(Characteristic.On)
+      .on('get', this.getFanOn.bind(this))
+      .on('set', this.setFanOn.bind(this));
+    fanService.fan
+      .getCharacteristic(Characteristic.RotationSpeed)
+      .on('get', this.getFanRotationSpeed.bind(this))
+      .on('set', this.setFanRotationSpeed.bind(this));
+
+    return [informationService, temperatureService, fanService];
     }
   };
-
+dad
 if (!Date.now)
   {
   Date.now = function() { return new Date().getTime(); }
