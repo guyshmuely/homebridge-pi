@@ -53,6 +53,7 @@ PiTemperatureAccessory.prototype =
   // CHANGED
   setFanDutyCycle: function()
     {
+      this.log("Raspberry Pi Fan speed " + (fanDutyCycle / 255) * 100);
       fanGpio.pwmWrite(fanDutyCycle);
     },
 
@@ -135,7 +136,7 @@ PiTemperatureAccessory.prototype =
     return [informationService, temperatureService, fanService];
     }
   };
-dad
+
 if (!Date.now)
   {
   Date.now = function() { return new Date().getTime(); }
