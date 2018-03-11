@@ -7,7 +7,8 @@ var fs = require('fs');
 //    fanDutyCycle = 0,
 //    fanGpio = new Gpio(21, {mode: Gpio.OUTPUT});
 
-var fanDutyCycle = 0;
+//var fanDutyCycle = 0;
+var fanSpeed = 0;
 var wpi = require('node-wiring-pi');
 wpi.wiringPiSetupGpio();
 wpi.softPwmCreate(21, 0, 100);
@@ -57,34 +58,34 @@ PiTemperatureAccessory.prototype =
     },
 
   // CHANGED
-  setFanDutyCycle: function()
+  setFanSpeed: function()
     {
-      var speed = parseInt((fanDutyCycle / 255) * 100);
-      this.log("Raspberry Pi Fan speed " + speed);
+      //var speed = parseInt((fanDutyCycle / 255) * 100);
+      this.log("Raspberry Pi Fan speed " + fanSpeed);
       //fanGpio.pwmWrite(fanDutyCycle);
-      wpi.softPwmWrite(21, speed);
+      wpi.softPwmWrite(21, fanSpeed);
     },
 
   getFanOn: function(cb)
     {
-      const on = fanDutyCycle > 0;
+      const on = fanSpeed > 0;
       cb(null, on);
     },
 
   setFanOn: function (on, cb)
     {
-      if (on) {
-        fanDutyCycle = 255;
+      if (on && fanSpeed == 0) {
+        fanSpeed = 100;
       } else {
-        fanDutyCycle = 0; // 0% duty cycle to turn off
+        fanSpeed = 0;
       }
-      this.setFanDutyCycle();
+      this.setFanSpeed();
       cb(null, on);
     },
 
   getFanRotationSpeed:function (cb)
     {
-      cb(null, (fanDutyCycle / 255) * 100);
+      cb(null, fanSpeed);
     },
 
   setFanRotationSpeed:function (speed, cb)
@@ -92,10 +93,10 @@ PiTemperatureAccessory.prototype =
       // speed given is a number 100 (full power) to 0
       //console.log('setRotationSpeed',speed);
       // scale speed by duty cycle
-      fanDutyCycle = 0|(speed / 100 * 255);
+      fanSpeed = speed;
       //if (this.dutycycle < this.min_dutycycle) this.dutycycle = this.min_dutycycle; // clamp to minimum TODO: return error to user if can't go this low?
       //console.log('dutycycle',this.dutycycle);
-      this.setFanDutyCycle()
+      this.setFanSpeed();
       cb(null);
     },
 
