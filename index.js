@@ -10,7 +10,7 @@ var fs = require('fs');
 var fanDutyCycle = 0;
 var wpi = require('node-wiring-pi');
 wpi.wiringPiSetupGpio();
-wpi.softPwmCreate(21);
+wpi.softPwmCreate(21, 0, 100);
 
 
 
@@ -59,8 +59,8 @@ PiTemperatureAccessory.prototype =
   // CHANGED
   setFanDutyCycle: function()
     {
-      var speed = parseInt((fanDutyCycle / 255) * 100);
-      this.log("Raspberry Pi Fan speed " + speed;
+      var speed = (fanDutyCycle / 255) * 100;
+      this.log("Raspberry Pi Fan speed " + speed);
       //fanGpio.pwmWrite(fanDutyCycle);
       wpi.softPwmWrite(21, speed);
     },
