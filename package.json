@@ -24,7 +24,7 @@
     "url": "https://github.com/markwj/homebridge-pi/issues"
   },
   "dependencies": {
-    "wiring-pi": ">=2.2.0"
+    "node-wiring-pi": ">=0.0.4"
   },
   "homepage": "https://github.com/markwj/homebridge-pi#readme"
 }

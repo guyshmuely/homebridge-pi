@@ -8,7 +8,7 @@ var fs = require('fs');
 //    fanGpio = new Gpio(21, {mode: Gpio.OUTPUT});
 
 var fanDutyCycle = 0;
-var wpi = require('wiring-pi');
+var wpi = require('node-wiring-pi');
 wpi.wiringPiSetupGpio();
 wpi.softPwmCreate(21);
 
