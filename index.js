@@ -76,7 +76,7 @@ PiTemperatureAccessory.prototype =
     {
       if (on && fanSpeed == 0) {
         fanSpeed = 100;
-      } else {
+      } else if (!on) {
         fanSpeed = 0;
       }
       this.setFanSpeed();
