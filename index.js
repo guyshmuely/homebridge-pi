@@ -132,11 +132,11 @@ PiTemperatureAccessory.prototype =
 
     // CHANGED
     fanService = new Service.Fan(this.name);
-    fanService.fan
+    fanService
       .getCharacteristic(Characteristic.On)
       .on('get', this.getFanOn.bind(this))
       .on('set', this.setFanOn.bind(this));
-    fanService.fan
+    fanService
       .getCharacteristic(Characteristic.RotationSpeed)
       .on('get', this.getFanRotationSpeed.bind(this))
       .on('set', this.setFanRotationSpeed.bind(this));
