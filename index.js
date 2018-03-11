@@ -3,9 +3,15 @@
 var fs = require('fs');
 
 // CHANGED
-var Gpio = require('pigpio').Gpio,
-    fanDutyCycle = 0,
-    fanGpio = new Gpio(21, {mode: Gpio.OUTPUT});
+//var Gpio = require('pigpio').Gpio,
+//    fanDutyCycle = 0,
+//    fanGpio = new Gpio(21, {mode: Gpio.OUTPUT});
+
+var fanDutyCycle = 0;
+var wpi = require('wiring-pi');
+wpi.wiringPiSetupGpio();
+wpi.softPwmCreate(21);
+
 
 
 var Service, Characteristic;
@@ -54,7 +60,8 @@ PiTemperatureAccessory.prototype =
   setFanDutyCycle: function()
     {
       this.log("Raspberry Pi Fan speed " + (fanDutyCycle / 255) * 100);
-      fanGpio.pwmWrite(fanDutyCycle);
+      //fanGpio.pwmWrite(fanDutyCycle);
+      wpi.softPwmWrite(21, (fanDutyCycle / 255) * 100);
     },
 
   getFanOn: function(cb)
