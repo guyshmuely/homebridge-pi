@@ -178,7 +178,8 @@ PiTemperatureAccessory.prototype =
       this.getState(function(){});
       if (this.temperature > 50) {
         this.setFanSpeed(100);
-      }
+      } else this.setFanSpeed(0);
+      fanService.setCharacteristic(Characteristic.RotationSpeed, this.fanSpeed);
     }
 
   };
