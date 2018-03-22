@@ -30,9 +30,9 @@ function PiTemperatureAccessory(log, config)
   this.lastupdate = 0;
   this.fanSpeed = 0;
   this.monitorTempInterval = null;
-  this.desiredTemp = 52;
-  this.pTemp=15;
-  this.iTemp=2;
+  this.desiredTemp = 54;
+  this.pTemp=20;
+  this.iTemp=4;
   this.integralSum=0;
   }
 
@@ -194,7 +194,7 @@ PiTemperatureAccessory.prototype =
       if (this.integralSum < -100) this.integralSum = -100;
 
 
-      if (variableFanSpeed > 15) this.setFanSpeed(variableFanSpeed);
+      if (variableFanSpeed >= 20) this.setFanSpeed(variableFanSpeed);
       else this.setFanSpeed(0);
 
       fanService.getCharacteristic(Characteristic.On).updateValue(this.fanSpeed > 0);
