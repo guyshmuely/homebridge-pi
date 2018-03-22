@@ -180,7 +180,7 @@ PiTemperatureAccessory.prototype =
       if (this.temperature > 50) {
         this.setFanSpeed(100);
       } else this.setFanSpeed(0);
-      fanService.setCharacteristic(Characteristic.RotationSpeed, this.fanSpeed);
+      fanService.getCharacteristic(Characteristic.RotationSpeed).updateValue(this.fanSpeed);
     }
 
   };
