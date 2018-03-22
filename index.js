@@ -3,12 +3,6 @@
 var fs = require('fs');
 
 // CHANGED
-//var Gpio = require('pigpio').Gpio,
-//    fanDutyCycle = 0,
-//    fanGpio = new Gpio(21, {mode: Gpio.OUTPUT});
-
-//var fanDutyCycle = 0;
-var fanSpeed = 0;
 var wpi = require('node-wiring-pi');
 wpi.wiringPiSetupGpio();
 wpi.softPwmCreate(21, 0, 100);
@@ -20,6 +14,7 @@ var temperatureService;
 
 // CHANGED
 var fanService;
+var fanManualControlService;
 
 module.exports = function (homebridge)
   {
@@ -33,6 +28,8 @@ function PiTemperatureAccessory(log, config)
   this.log = log;
   this.name = config['name'];
   this.lastupdate = 0;
+  this.fanSpeed = 0;
+  this.monitorTempInterval = null;
   }
 
 PiTemperatureAccessory.prototype =
@@ -58,7 +55,20 @@ PiTemperatureAccessory.prototype =
     },
 
   // CHANGED
-  setFanSpeed: function()
+
+  getManualControlState: function(cb)
+    {
+      cb(null, this.monitorTempInterval != null);
+    },
+
+  setManualControlState: function(state, cb)
+    {
+      if (state) this.startMonitorTemp();
+      else this.stopMonitorTemp();
+      cb(null, this.monitorTempInterval != null);
+    },
+
+  setFanSpeed: function(fanSpeed)
     {
       //var speed = parseInt((fanDutyCycle / 255) * 100);
       this.log("Raspberry Pi Fan speed " + fanSpeed);
@@ -68,24 +78,23 @@ PiTemperatureAccessory.prototype =
 
   getFanOn: function(cb)
     {
-      const on = fanSpeed > 0;
+      const on = this.fanSpeed > 0;
       cb(null, on);
     },
 
   setFanOn: function (on, cb)
     {
-      if (on && fanSpeed == 0) {
-        fanSpeed = 100;
+      if (on && this.fanSpeed == 0) {
+        this.setFanSpeed(100);
       } else if (!on) {
-        fanSpeed = 0;
+        this.setFanSpeed(0);
       }
-      this.setFanSpeed();
       cb(null, on);
     },
 
   getFanRotationSpeed:function (cb)
     {
-      cb(null, fanSpeed);
+      cb(null, this.fanSpeed);
     },
 
   setFanRotationSpeed:function (speed, cb)
@@ -93,10 +102,9 @@ PiTemperatureAccessory.prototype =
       // speed given is a number 100 (full power) to 0
       //console.log('setRotationSpeed',speed);
       // scale speed by duty cycle
-      fanSpeed = speed;
       //if (this.dutycycle < this.min_dutycycle) this.dutycycle = this.min_dutycycle; // clamp to minimum TODO: return error to user if can't go this low?
       //console.log('dutycycle',this.dutycycle);
-      this.setFanSpeed();
+      this.setFanSpeed(speed);
       cb(null);
     },
 
@@ -131,7 +139,16 @@ PiTemperatureAccessory.prototype =
       .getCharacteristic(Characteristic.CurrentTemperature)
       .setProps({maxValue: 120});
 
+
+
+
     // CHANGED
+    fanManualControlService = new Service.Switch(this.name);
+    fanManualControlService
+      .getCharacteristic(Characteristic.On)
+      .on('get', this.getManualControlState.bind(this))
+      .on('set', this.setManualControlState.bind(this));
+
     fanService = new Service.Fan(this.name);
     fanService
       .getCharacteristic(Characteristic.On)
@@ -142,8 +159,27 @@ PiTemperatureAccessory.prototype =
       .on('get', this.getFanRotationSpeed.bind(this))
       .on('set', this.setFanRotationSpeed.bind(this));
 
-    return [informationService, temperatureService, fanService];
+    return [informationService, temperatureService, fanService, fanManualControlService];
+    },
+
+    stopMonitorTemp: function() {
+      clearInterval(this.monitorTempInterval);
+      this.monitorTempInterval = null;
+    },
+
+    startMonitorTemp: function() {
+      this.monitorTempInterval = setInterval(function() {
+        self.monitorTemp();
+      }, 20 * 1000);
+    },
+
+    monitorTemp: function () {
+      this.getState();
+      if (this.temperature > 50) {
+        this.setFanSpeed(100);
+      }
     }
+
   };
 
 if (!Date.now)
