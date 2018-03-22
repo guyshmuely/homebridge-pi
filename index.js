@@ -175,7 +175,7 @@ PiTemperatureAccessory.prototype =
     },
 
     monitorTemp: function () {
-      this.getState();
+      this.getState(function(){});
       if (this.temperature > 50) {
         this.setFanSpeed(100);
       }
