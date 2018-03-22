@@ -168,6 +168,7 @@ PiTemperatureAccessory.prototype =
     },
 
     startMonitorTemp: function() {
+      var self = this;
       this.monitorTempInterval = setInterval(function() {
         self.monitorTemp();
       }, 20 * 1000);
