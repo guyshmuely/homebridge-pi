@@ -30,6 +30,7 @@ function PiTemperatureAccessory(log, config)
   this.lastupdate = 0;
   this.fanSpeed = 0;
   this.monitorTempInterval = null;
+  this.maxMonitorTemp = 45;
   }
 
 PiTemperatureAccessory.prototype =
@@ -172,13 +173,16 @@ PiTemperatureAccessory.prototype =
       var self = this;
       this.monitorTempInterval = setInterval(function() {
         self.monitorTemp();
-      }, 20 * 1000);
+      }, 30 * 1000);
     },
 
     monitorTemp: function () {
       this.getState(function(){});
-      if (this.temperature > 50) {
-        this.setFanSpeed(100);
+      if (this.temperature > this.maxMonitorTemp) {
+        var diff = Math.ceil(this.temperature + 2 - this.maxMonitorTemp);
+        var variableFanSpeed = Math.min(diff * 10, 100)
+        this.setFanSpeed(variableFanSpeed);
+        fanService.getCharacteristic(Characteristic.On).updateValue(true);
         fanService.getCharacteristic(Characteristic.RotationSpeed).updateValue(this.fanSpeed);
       } else {
         this.setFanSpeed(0);
