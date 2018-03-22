@@ -70,10 +70,11 @@ PiTemperatureAccessory.prototype =
 
   setFanSpeed: function(fanSpeed)
     {
+      this.fanSpeed = fanSpeed;
       //var speed = parseInt((fanDutyCycle / 255) * 100);
-      this.log("Raspberry Pi Fan speed " + fanSpeed);
+      this.log("Raspberry Pi Fan speed " + this.fanSpeed);
       //fanGpio.pwmWrite(fanDutyCycle);
-      wpi.softPwmWrite(21, fanSpeed);
+      wpi.softPwmWrite(21, this.fanSpeed);
     },
 
   getFanOn: function(cb)
