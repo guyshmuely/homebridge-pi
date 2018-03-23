@@ -31,8 +31,8 @@ function PiTemperatureAccessory(log, config)
   this.fanSpeed = 0;
   this.monitorTempInterval = null;
   this.desiredTemp = 50;
-  this.pTemp=20;
-  this.iTemp=4;
+  this.pTemp=25;
+  this.iTemp=5;
   this.integralSum=0;
   }
 
